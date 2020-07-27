@@ -228,9 +228,4 @@ return [
 
     ],
 
-    'sites' => [
-        'front_domain' => env('DOMAIN_FRONT', null),
-        'agency_domain' => env('DOMAIN_AGENCY', null),
-    ],
-
 ];

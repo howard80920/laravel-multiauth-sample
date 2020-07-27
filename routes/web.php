@@ -11,23 +11,42 @@
 |
 */
 
+// shared routes
 Route::get('/welcome', 'RootController@welcome');
+Route::get('/infos', 'RootController@infos');
 
-if (config('app.sites.front_domain')) {
-    Route::group([
-        'domain'    => config('app.sites.front_domain'),
-        'namespace' => 'Front',
-    ], function () {
-        include base_path('routes/sites/front.php');
+// custom route's macro
+Route::macro('subdomain', function (string $subdomain, \Closure $definition) {
+    $domains = [];
+    if ($subdomain === 'localhost') {
+        $domains = [ $subdomain ];
+    } else {
+        $domains = array_map(function ($domain) use ($subdomain) {
+            return "$subdomain.$domain";
+        }, explode(';', config('site.domains')));
+    }
+    foreach ($domains as $domain) {
+        Route::group([ 'domain' => $domain ], $definition);
+    }
+});
+
+if (config('site.subdomain.front')) {
+    Route::subdomain(config('site.subdomain.front'), function () {
+        Route::group([
+            'namespace' => 'Front'
+        ], function () {
+            include base_path('routes/sites/front.php');
+        });
     });
 }
 
-if (config('app.sites.agency_domain')) {
-    Route::group([
-        'domain'     => config('app.sites.agency_domain'),
-        'namespace'  => 'Agency',
-        'middleware' => [ 'guard:agent' ]
-    ], function () {
-        include base_path('routes/sites/agency.php');
+if (config('site.subdomain.agency')) {
+    Route::subdomain(config('site.subdomain.agency'), function () {
+        Route::group([
+            'namespace'  => 'Agency',
+            'middleware' => [ 'guard:agent' ]
+        ], function () {
+            include base_path('routes/sites/agency.php');
+        });
     });
 }
