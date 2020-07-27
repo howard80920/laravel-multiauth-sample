@@ -11,9 +11,7 @@
 |
 */
 
-Route::get('/welcome', function () {
-    return view('welcome');
-});
+Route::get('/welcome', 'RootController@welcome');
 
 if (config('app.sites.front_domain')) {
     Route::group([
